@@ -24,7 +24,7 @@ This repository packages the following helpers as a BCR-friendly module:
 Add this to your `MODULE.bazel`:
 
 ```starlark
-bazel_dep(name = "rules_chisel", version = "0.2.0")
+bazel_dep(name = "rules_chisel", version = "0.3.0")
 
 # rules_chisel uses rules_scala underneath.
 bazel_dep(name = "rules_scala", version = "7.1.5")

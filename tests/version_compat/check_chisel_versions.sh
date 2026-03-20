@@ -64,7 +64,7 @@ run_case() {
   cat > "${ws}/MODULE.bazel" <<MODULE
 module(name = "${case_name}")
 
-bazel_dep(name = "rules_chisel", version = "0.2.0")
+bazel_dep(name = "rules_chisel", version = "0.3.0")
 local_path_override(
     module_name = "rules_chisel",
     path = "${REPO_ROOT}",
