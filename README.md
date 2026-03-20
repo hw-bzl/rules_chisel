@@ -64,7 +64,7 @@ use_repo(
 register_toolchains("@rules_scala_toolchains//...:all")
 
 # Required for chisel_test: Verilator runtime/tools.
-bazel_dep(name = "verilator", version = "5.036.bcr.3")
+bazel_dep(name = "verilator", version = "5.044")
 
 # Chisel dependencies (creates @chisel_maven)
 chisel = use_extension("@rules_chisel//chisel:extensions.bzl", "chisel")
@@ -76,6 +76,8 @@ chisel.toolchain(
 )
 use_repo(chisel, "chisel_maven")
 ```
+
+If you are authoring a reusable Bazel module (not an application root) and only need Chisel for that module's own development/tests, use `dev_dependency = True` on `use_extension(...)` so your toolchain tag does not leak to downstream consumers.
 
 
 ## Notes

@@ -171,10 +171,17 @@ def _chisel_extension_impl(module_ctx):
         scala_version = settings.scala_version,
     )
 
+    root_is_dev = True
+    for mod in module_ctx.modules:
+        if hasattr(mod, "is_root") and mod.is_root:
+            for tag in mod.tags.toolchain:
+                if not module_ctx.is_dev_dependency(tag):
+                    root_is_dev = False
+
     return module_ctx.extension_metadata(
         reproducible = settings.lock_file != None,
-        root_module_direct_deps = [settings.repo_name],
-        root_module_direct_dev_deps = [],
+        root_module_direct_deps = [] if root_is_dev else [settings.repo_name],
+        root_module_direct_dev_deps = [settings.repo_name] if root_is_dev else [],
     )
 
 toolchain = tag_class(

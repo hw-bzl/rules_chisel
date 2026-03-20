@@ -21,12 +21,16 @@ if [[ -f "${REPO_ROOT}/.bazelversion" ]]; then
 fi
 
 SCALA_VERSION="2.13.17"
-# Each entry uses format: chisel_version:firtool_resolver_version
+# Each entry uses format: chisel_version:firtool_resolver_version[:mode]
+# mode is optional and supports:
+#   - normal (default): use_extension(..., dev_dependency = False)
+#   - dev: use_extension(..., dev_dependency = True)
 if [[ $# -gt 0 ]]; then
   CASES=("$@")
 else
   CASES=(
-    "7.2.0:2.0.1"
+    "7.2.0:2.0.1:normal"
+    "7.2.0:2.0.1:dev"
     "7.8.0:2.0.1"
   )
 fi
@@ -46,7 +50,12 @@ WS
 run_case() {
   local chisel_version="$1"
   local firtool_version="$2"
-  local case_name="chisel_${chisel_version//./_}"
+  local mode="${3:-normal}"
+  local extension_dev_flag=""
+  if [[ "${mode}" == "dev" ]]; then
+    extension_dev_flag=", dev_dependency = True"
+  fi
+  local case_name="chisel_${chisel_version//./_}_${mode}"
   local ws="${TMP_ROOT}/${case_name}"
   local out_root="${TMP_ROOT}/output_root"
 
@@ -77,7 +86,7 @@ use_repo(
 )
 register_toolchains("@rules_scala_toolchains//...:all")
 
-chisel = use_extension("@rules_chisel//chisel:extensions.bzl", "chisel")
+chisel = use_extension("@rules_chisel//chisel:extensions.bzl", "chisel"${extension_dev_flag})
 chisel.toolchain(
     chisel_version = "${chisel_version}",
     scala_version = "${SCALA_VERSION}",
@@ -126,7 +135,7 @@ object Main extends App {
 }
 SCALA
 
-  echo "==> [compat] Building with Chisel ${chisel_version} (firtool-resolver ${firtool_version})"
+  echo "==> [compat] Building with Chisel ${chisel_version} (firtool-resolver ${firtool_version}, mode=${mode})"
   (
     cd "${ws}"
     "${BAZEL_BIN}" \
@@ -149,8 +158,8 @@ SCALA
 }
 
 for entry in "${CASES[@]}"; do
-  IFS=":" read -r chisel_version firtool_version <<<"${entry}"
-  run_case "${chisel_version}" "${firtool_version}"
+  IFS=":" read -r chisel_version firtool_version mode <<<"${entry}"
+  run_case "${chisel_version}" "${firtool_version}" "${mode:-normal}"
 done
 
 echo "==> Version compatibility checks passed"

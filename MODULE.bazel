@@ -57,7 +57,7 @@ register_toolchains(
     dev_dependency = True,
 )
 
-chisel = use_extension("//chisel:extensions.bzl", "chisel")
+chisel = use_extension("//chisel:extensions.bzl", "chisel", dev_dependency = True)
 chisel.toolchain(
     chisel_version = "7.2.0",
     fetch_sources = True,
