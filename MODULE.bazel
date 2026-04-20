@@ -1,6 +1,6 @@
 module(
     name = "rules_chisel",
-    version = "0.3.0",
+    version = "0.3.1",
     bazel_compatibility = [">=7.6.0"],
 )
 

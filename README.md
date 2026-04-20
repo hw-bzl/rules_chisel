@@ -24,7 +24,7 @@ This repository packages the following helpers as a BCR-friendly module:
 Add this to your `MODULE.bazel`:
 
 ```starlark
-bazel_dep(name = "rules_chisel", version = "0.3.0")
+bazel_dep(name = "rules_chisel", version = "0.3.1")
 
 # rules_chisel uses rules_scala underneath.
 bazel_dep(name = "rules_scala", version = "7.1.5")
@@ -37,8 +37,6 @@ scala_config.settings(scala_version = "2.13.17")
 scala_deps = use_extension("@rules_scala//scala/extensions:deps.bzl", "scala_deps")
 scala_deps.scala()
 scala_deps.scalatest()  # only needed if you use chisel_test
-
-bazel_dep(name = "verilator", version = "5.044") # only needed if you use chisel_test
 
 # Chisel dependencies (creates @chisel_maven)
 chisel = use_extension("@rules_chisel//chisel:extensions.bzl", "chisel")
