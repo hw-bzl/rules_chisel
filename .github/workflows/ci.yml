@@ -26,10 +26,8 @@ jobs:
       - name: Build all targets
         run: bazel build //...
 
-      - name: Run smoke tests
-        run: |
-          bazel test //tests/smoke:verilog_concat_test --test_output=errors
-          bazel test //tests/smoke:simple_adder_test --test_output=errors
+      - name: Run tests
+        run: bazel test //... --test_output=errors
 
       - name: Run Chisel version compatibility checks
         run: tests/version_compat/check_chisel_versions.sh

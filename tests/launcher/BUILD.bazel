@@ -1,0 +1,10 @@
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+package(default_visibility = ["//visibility:private"])
+
+sh_test(
+    name = "launcher_runfiles_test",
+    size = "small",
+    srcs = ["launcher_runfiles_test.sh"],
+    data = ["//chisel:defs.bzl"],
+)
