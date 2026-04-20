@@ -1,16 +1,15 @@
 module(
     name = "rules_chisel",
     version = "0.3.0",
-    bazel_compatibility = [">=7.5.0"],
-    compatibility_level = 0,
+    bazel_compatibility = [">=7.6.0"],
 )
 
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "rules_jvm_external", version = "6.7")
 bazel_dep(name = "rules_scala", version = "7.1.5")
-bazel_dep(name = "verilator", version = "5.036.bcr.3")
+bazel_dep(name = "verilator", version = "5.046.bcr.3")
 bazel_dep(name = "rules_license", version = "1.0.0")
-bazel_dep(name = "rules_shell", version = "0.3.0")
+bazel_dep(name = "rules_shell", version = "0.7.1")
 bazel_dep(name = "rules_java", version = "8.14.0")
 
 scala_config = use_extension(
