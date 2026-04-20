@@ -9,6 +9,10 @@
 # It intentionally does not invoke real Chisel/Verilator so it runs in <1s.
 set -euo pipefail
 
+realpath_portable() {
+    python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
+}
+
 DEFS_BZL="${TEST_SRCDIR:-}/_main/chisel/defs.bzl"
 if [[ ! -f "$DEFS_BZL" ]]; then
     DEFS_BZL="$(pwd)/chisel/defs.bzl"
@@ -98,8 +102,9 @@ chmod +x "$LAUNCHER"
 
 # Precondition: the symlink does resolve to the external source tree before the
 # launcher runs. If this ever breaks, the fixture itself is wrong.
-pre_real="$(readlink -f "$VROOT/bin/verilator_perl_stub")"
-if [[ "$pre_real" != "$EXT_SRC/verilator_perl_stub" ]]; then
+pre_real="$(realpath_portable "$VROOT/bin/verilator_perl_stub")"
+expected_pre_real="$(realpath_portable "$EXT_SRC/verilator_perl_stub")"
+if [[ "$pre_real" != "$expected_pre_real" ]]; then
     echo "FAIL: test fixture broken — symlink does not point at external source" >&2
     exit 1
 fi
@@ -125,8 +130,9 @@ fi
 # inside VERILATOR_ROOT. This is exactly what Perl's $RealBin computes. Before
 # the fix it resolved back into $EXT_SRC, triggering verilator's
 # "VERILATOR_ROOT is set to inconsistent path" error.
-realbin_dir="$(dirname "$(readlink -f "$VROOT/bin/verilator_perl_stub")")"
-if [[ "$realbin_dir" != "$VROOT/bin" ]]; then
+realbin_dir="$(dirname "$(realpath_portable "$VROOT/bin/verilator_perl_stub")")"
+expected_realbin_dir="$(realpath_portable "$VROOT/bin")"
+if [[ "$realbin_dir" != "$expected_realbin_dir" ]]; then
     echo "FAIL: \$RealBin resolves to $realbin_dir, expected $VROOT/bin" >&2
     echo "       (this reproduces the VERILATOR_ROOT inconsistent-path bug)" >&2
     fail=1
