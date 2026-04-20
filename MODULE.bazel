@@ -39,3 +39,5 @@ use_repo(
     chisel,
     "chisel_maven",
 )
+
+bazel_dep(name = "rules_python", version = "1.7.0", dev_dependency = True)

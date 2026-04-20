@@ -2,6 +2,9 @@ name: Lint
 
 on:
   push:
+    branches:
+      - main
+      - master
   pull_request:
 
 jobs:
@@ -13,8 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: |
+      - name: Install buildifier
+        run: |
           sudo wget https://github.com/bazelbuild/buildtools/releases/download/${{ env.BUILDIFIER_VERSION }}/buildifier-linux-amd64 -O /usr/local/bin/buildifier
           sudo chmod +x /usr/local/bin/buildifier
 
-      - run: buildifier -lint=warn -mode=check -warnings=all -r .
+      - name: Check formatting
+        run: buildifier -lint=warn -mode=check -warnings=all -r .

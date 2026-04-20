@@ -1,0 +1,11 @@
+# {version}
+
+To start using this module, make sure you have set up Bzlmod according to the [user guide](https://bazel.build/docs/bzlmod), and add the following to your MODULE.bazel file:
+
+```python
+bazel_dep(name = "rules_chisel", version = "{version}")
+```
+
+Additional documentation can be found at: https://github.com/hw-bzl/rules_chisel
+
+SHA256: `{sha256_base64}`

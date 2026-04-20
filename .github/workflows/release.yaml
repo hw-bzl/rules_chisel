@@ -1,0 +1,77 @@
+---
+name: Release
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      # Only trigger for new releases
+      - "version.bzl"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    if: ${{ github.repository_owner == 'hw-bzl' }}
+    permissions:
+      contents: write
+      actions: write
+      attestations: write
+    outputs:
+      release_version: ${{ steps.version.outputs.release_version }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Detect the current version
+        id: version
+        run: |
+          version="$(grep 'VERSION =' ./version.bzl | sed 's/VERSION = "//' | sed 's/"//')"
+          echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
+          echo "release_version=${version}" >> $GITHUB_OUTPUT
+
+      - name: Create release artifact
+        id: artifact
+        run: |
+          tar -czf ${{ github.workspace }}/.github/rules_chisel.tar.gz --exclude=".git" --exclude=".github" -C ${{ github.workspace }} .
+          sha256_base64="$(shasum --algorithm 256 ${{ github.workspace }}/.github/rules_chisel.tar.gz | awk '{ print $1 }' | xxd -r -p | base64)"
+          echo "ARCHIVE_SHA256_BASE64=${sha256_base64}" >> $GITHUB_ENV
+          echo "sha256=${sha256_base64}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        run: |
+          sed "s/{version}/$RELEASE_VERSION/g" ${{ github.workspace }}/.github/release_notes.template \
+          | sed "s#{sha256_base64}#$ARCHIVE_SHA256_BASE64#g" \
+          > ${{ github.workspace }}/.github/release_notes.txt
+
+      - name: "Prepare and Upload Release"
+        run: |
+          mv ${{ github.workspace }}/.github/rules_chisel.tar.gz \
+              ${{ github.workspace }}/.github/rules_chisel-$RELEASE_VERSION.tar.gz
+
+      - name: "Release and Upload Assets"
+        uses: softprops/action-gh-release@v2
+        id: rules_release
+        with:
+          tag_name: ${{ steps.version.outputs.release_version }}
+          target_commitish: ${{ github.sha }}
+          body_path: ${{ github.workspace }}/.github/release_notes.txt
+          generate_release_notes: true
+          files: |
+            ${{ github.workspace }}/.github/rules_chisel-${{ steps.version.outputs.release_version }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  bcr-publish:
+    needs: [release]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/bcr-publish.yaml
+    with:
+      release_version: ${{ needs.release.outputs.release_version }}
+    secrets:
+      BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}
